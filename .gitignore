@@ -1,0 +1,11 @@
+**/__pycache__/
+
+.vscode
+
+# may store user data
+*.txt
+*.yaml
+*.csv
+
+# sample schema, you should copy this yaml schema and rename it instead of modify it
+!schema.yaml

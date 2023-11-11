@@ -1,4 +1,5 @@
 from time import time
+import traceback
 
 from generator import BaseGenerator
 
@@ -37,7 +38,7 @@ def main():
     # loop all tables
     for table_name, fields in struct.items():
         headers = list(fields.keys())
-        header_data_map = {name: [] for name in headers}
+        header_data_map = {name: list() for name in headers}
 
         # sort fields by its order (default is 0)
         def _key(field_item):
@@ -106,8 +107,9 @@ def main():
 
                 # save data to map
                 header_data_map[field_name] = gen_data
-            except Exception as e:
-                print(f"Except at [{table_name}.{field_name}]: {e}")
+            except:
+                traceback.print_exc()
+                print(f"Except at [{table_name}.{field_name}]")
                 exit(1)
 
         # write/dump

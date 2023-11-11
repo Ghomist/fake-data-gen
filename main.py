@@ -18,11 +18,15 @@ def init():
 
 
 def main():
+    from xeger import Xeger
     from classes import Expandable
     from context import context
     from generator import ForeignGenerator, default_generator, gen
     from schema import params, struct
     from writer import get_writer
+
+    xeger = Xeger()
+    context["xeger"] = xeger.xeger
 
     # user params
     amount = params.get("amount", 10)

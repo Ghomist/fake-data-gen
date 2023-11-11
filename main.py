@@ -59,26 +59,20 @@ def main():
 
             # prepare generators
             for props in props_list:
-                gen_type = props.get("rule", "const")
-                generator = gen(gen_type)
-                generator.pass_args(props.get("args", {}))
-                if gen_type == ForeignGenerator.rule_name:
-                    context.update({"__data_map__": data_map})
+                try:
+                    gen_type = props.get("rule", "const")
+                    generator = gen(gen_type)
+                    generator.set_props(props)
 
-                # TODO: support ref
-                # reference to other table
-                # ref = props.get("ref", None)
-                # if ref:
-                #     pass
+                    if gen_type == ForeignGenerator.rule_name:
+                        context.update({"__data_map__": data_map})
 
-                # str to be generated
-                generator.set_unique(props.get("unique", False))
-                generator.pass_value(props.get("value", ""))
-                generator.pass_condition(props.get("if", None))
-                generator.pass_convert(props.get("type", None))
-
-                # append generator
-                generators.append(generator)
+                    # append generator
+                    generators.append(generator)
+                except:
+                    traceback.print_exc()
+                    print(f"Error when parsing {table_name}.{field_name}")
+                    exit(1)
 
             # need a empty generator for default 'None'
             generators.append(default_generator)
@@ -104,13 +98,13 @@ def main():
                             gen_value = generator.gen()
                             gen_data.append(gen_value)
                             break
-
-                # save data to map
-                header_data_map[field_name] = gen_data
             except:
                 traceback.print_exc()
-                print(f"Except at [{table_name}.{field_name}]")
+                print(f"Error when generating [{table_name}.{field_name}]")
                 exit(1)
+
+            # save data to map
+            header_data_map[field_name] = gen_data
 
         # write/dump
         writer = get_writer(writer_type)

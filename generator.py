@@ -17,28 +17,21 @@ gen_failed_cnt = 0
 class BaseGenerator:
     rule_name: str
 
-    def pass_args(self, args: dict):
-        self.args = args
+    def __init__(self) -> None:
+        self.condition = "True"
 
-    def pass_value(self, value):
-        self.value = value
+    def set_props(self, props: dict[str, Any]):
+        self.args: dict[str, Any] = props.get("args", {})
+        self.unique: bool = props.get("unique", False)
+        self.value: str = props.get("value", "")
+        self.condition: str = props.get("if", "True")
+        self.convert = props.get("type", None)
+        self.limit: str | None = props.get("limit", None)
 
-    def pass_condition(self, condition):
-        self.condition = condition
-
-    def pass_convert(self, convert):
-        self.convert = convert
-
-    def set_unique(self, unique: bool):
-        self.unique = unique
-        if unique:
-            self.set = set()
+        self._set = set()
 
     def assert_condition(self):
-        if hasattr(self, "condition") and self.condition is not None:
-            return bool(eval(self.condition, context))
-        else:
-            return True
+        return bool(eval(self.condition, context))
 
     def gen(self) -> Any:
         pass  # return None
@@ -49,16 +42,26 @@ def _converted(gen):
         global gen_cnt, gen_col_cnt, gen_failed_cnt
 
         max_try = 100
-        while max_try:
+        for _ in range(max_try):
             r = gen(self)
             gen_cnt += 1
-            if not self.unique:
-                return type_convert(r, self.convert)
-            if r not in self.set:
-                self.set.add(r)
-                return type_convert(r, self.convert)
-            max_try -= 1
-            gen_col_cnt += 1
+
+            # test unique
+            if self.unique:
+                if r in self._set:
+                    gen_col_cnt += 1
+                    continue
+                else:
+                    self._set.add(r)
+
+            # test limit
+            if self.limit:
+                if not eval(self.limit, context):
+                    gen_col_cnt += 1
+                    continue
+
+            return type_convert(r, self.convert)
+
         gen_failed_cnt += 1
         return None
 
@@ -76,8 +79,10 @@ class EvalGenerator(BaseGenerator):
 class RangeGenerator(BaseGenerator):
     rule_name = "range"
 
-    def pass_value(self, value: str):
-        start, end = value.split("...")
+    def set_props(self, props: dict[str, Any]):
+        super().set_props(props)
+
+        start, end = self.value.split("...")
         assert end and start
         try:
             self.start_i = int(start)
@@ -101,6 +106,7 @@ class RegexGenerator(BaseGenerator):
     rule_name = "regex"
 
     def __init__(self) -> None:
+        super().__init__()
         self._x = Xeger()
 
     @_converted
@@ -111,14 +117,15 @@ class RegexGenerator(BaseGenerator):
 class ForeignGenerator(BaseGenerator):
     rule_name = "foreign"
 
-    def pass_args(self, args: dict):
+    def set_props(self, props: dict[str, Any]):
+        super().set_props(props)
+
         # cast mode
-        self.args = args
-        self.cast_mode = args.get("cast", None)
+        self.cast_mode = self.args.get("cast", None)
         assert self.cast_mode
 
-    def pass_value(self, value: str):
-        self.table, self.field = value.split(".")
+        # source field
+        self.table, self.field = self.value.split(".")
 
     @_converted
     def gen(self):
@@ -158,19 +165,20 @@ class ForeignGenerator(BaseGenerator):
                 )
 
                 # map to index
-                index_list = map(lambda item: item[0], filtered_list)
-                s = set(index_list)
-                indexes &= s
+                index_set = set(map(lambda item: item[0], filtered_list))
+                indexes &= index_set
+
+            # generate choices list
             choices = list(
                 map(
                     lambda item: item[1],
                     filter(lambda item: item[0] in indexes, enumerate(self.data_list)),
                 )
             )
-            if not choices:
-                return None
-            else:
+            try:
                 return choice(choices)
+            except:
+                return None
         else:
             return None
 
@@ -202,31 +210,29 @@ class NoneGenerator(BaseGenerator):
 class IncreaseGenerator(BaseGenerator):
     rule_name = "increase"
 
-    def pass_value(self, value: str):
-        self.value = int(value)
+    def set_props(self, props: dict[str, Any]):
+        super().set_props(props)
+
+        self.n = int(self.value) - 1
 
     @_converted
     def gen(self) -> Any:
-        if hasattr(self, "cnt"):
-            self.cnt = self.value
-        else:
-            self.cnt += 1
-        return self.cnt
+        self.n += 1
+        return self.n
 
 
 class DecreaseGenerator(BaseGenerator):
     rule_name = "decrease"
 
-    def pass_value(self, value: str):
-        self.value = int(value)
+    def set_props(self, props: dict[str, Any]):
+        super().set_props(props)
+
+        self.n = int(self.value) + 1
 
     @_converted
     def gen(self) -> Any:
-        if hasattr(self, "cnt"):
-            self.cnt = self.value
-        else:
-            self.cnt -= 1
-        return self.cnt
+        self.n -= 1
+        return self.n
 
 
 _rule_class_mapping = {

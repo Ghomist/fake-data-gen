@@ -81,26 +81,30 @@ def main():
             # all data of this field
             gen_data = []
 
-            for i in range(amount):
-                # line index and variable
-                line = Expandable()
-                line.set("index", i)
-                for header, data in header_data_map.items():
-                    if header == field_name or not data:
-                        line.set(header, None)
-                    else:
-                        line.set(header, data[i])
-                context.update({"line": line})
+            try:
+                for i in range(amount):
+                    # line index and variable
+                    line = Expandable()
+                    line.set("index", i)
+                    for header, data in header_data_map.items():
+                        if header == field_name or not data:
+                            line.set(header, None)
+                        else:
+                            line.set(header, data[i])
+                    context.update({"line": line})
 
-                # iterate generators
-                for generator in generators:
-                    if generator.assert_condition():
-                        gen_value = generator.gen()
-                        gen_data.append(gen_value)
-                        break
+                    # iterate generators
+                    for generator in generators:
+                        if generator.assert_condition():
+                            gen_value = generator.gen()
+                            gen_data.append(gen_value)
+                            break
 
-            # save data to map
-            header_data_map[field_name] = gen_data
+                # save data to map
+                header_data_map[field_name] = gen_data
+            except Exception as e:
+                print(f"Except at [{table_name}.{field_name}]: {e}")
+                exit(1)
 
         # write/dump
         writer = get_writer(writer_type)

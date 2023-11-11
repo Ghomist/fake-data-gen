@@ -111,24 +111,68 @@ class RegexGenerator(BaseGenerator):
 class ForeignGenerator(BaseGenerator):
     rule_name = "foreign"
 
+    def pass_args(self, args: dict):
+        # cast mode
+        self.args = args
+        self.cast_mode = args.get("cast", None)
+        assert self.cast_mode
+
     def pass_value(self, value: str):
         self.table, self.field = value.split(".")
 
     @_converted
     def gen(self):
-        gen_type = self.args.get("cast", None)
         if not hasattr(self, "data_list"):
-            self.data_list: list = context["__data_map__"][self.table][self.field]
-        assert gen_type
-        if gen_type == "one":
+            self.data_list: list = [*context["__data_map__"][self.table][self.field]]
+
+        # cast to foreign field
+        if self.cast_mode == "one":
             try:
                 c = choice(self.data_list)
                 self.data_list.remove(c)
                 return c
             except:
                 return None
-        elif gen_type == "random":
+        elif self.cast_mode == "random":
             return choice(self.data_list)
+        elif self.cast_mode == "filter":
+            # get filter list
+            filters = self.args["filters"]
+            if type(filters) is not list:
+                filters = [filters]
+
+            # indexes of filtered lines
+            indexes = {i for i in range(len(self.data_list))}
+
+            for f in filters:
+                field_name = f["field"]
+                condition = f["condition"]
+                filtered_list = context["__data_map__"][self.table][field_name]
+
+                # check condition
+                filtered_list = list(
+                    filter(
+                        lambda item: eval(condition, {"field": item[1], **context}),
+                        enumerate(filtered_list),
+                    )
+                )
+
+                # map to index
+                index_list = map(lambda item: item[0], filtered_list)
+                s = set(index_list)
+                indexes &= s
+            choices = list(
+                map(
+                    lambda item: item[1],
+                    filter(lambda item: item[0] in indexes, enumerate(self.data_list)),
+                )
+            )
+            if not choices:
+                return None
+            else:
+                return choice(choices)
+        else:
+            return None
 
 
 class ConstGenerator(BaseGenerator):

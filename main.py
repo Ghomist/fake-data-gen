@@ -34,6 +34,7 @@ def main():
     writer_type = params["format"]
 
     data_map = dict()
+    context["__data_map__"] = data_map
 
     # loop all tables
     for table_name, fields in struct.items():
@@ -63,15 +64,10 @@ def main():
                     gen_type = props.get("rule", "const")
                     generator = gen(gen_type)
                     generator.set_props(props)
-
-                    if gen_type == ForeignGenerator.rule_name:
-                        context.update({"__data_map__": data_map})
-
-                    # append generator
                     generators.append(generator)
                 except:
                     traceback.print_exc()
-                    print(f"Error when parsing {table_name}.{field_name}")
+                    print(f"Error when parsing [{table_name}.{field_name}]")
                     exit(1)
 
             # need a empty generator for default 'None'

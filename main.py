@@ -22,9 +22,12 @@ def main():
     from xeger import Xeger
     from classes import Expandable
     from context import context
-    from generator import ForeignGenerator, default_generator, gen
+    from generator import default_generator, gen
     from schema import params, struct
     from writer import get_writer
+    import random
+
+    context["random"] = random
 
     xeger = Xeger()
     context["xeger"] = xeger.xeger

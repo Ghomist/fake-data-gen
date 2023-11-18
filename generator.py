@@ -56,7 +56,7 @@ def _converted(gen):
 
             # test limit
             if self.limit:
-                if not eval(self.limit, context):
+                if not eval(self.limit, {"value": r, **context}):
                     gen_col_cnt += 1
                     continue
 

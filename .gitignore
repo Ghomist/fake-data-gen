@@ -8,4 +8,5 @@
 *.csv
 
 # sample schema, you should copy this yaml schema and rename it instead of modify it
-!schema.yaml
+!sample_schema.yaml
+!sample_provider.txt

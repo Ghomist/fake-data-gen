@@ -15,7 +15,7 @@ def load_schema(file_name=None):
     global faker_config, params, struct, env
 
     if not file_name:
-        file_name = "schema.yaml"
+        file_name = "sample_schema.yaml"
 
     with open(file_name) as f:
         schema = yaml.load(f, yaml.FullLoader)

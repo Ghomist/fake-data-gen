@@ -1,0 +1,102 @@
+# this is a sample schema file, you can copy it and change anything you want
+
+# faker config
+faker:
+  locales:
+    - zh_CN
+    # - zh_TW
+  providers:
+    - address
+    - name: my_provider
+      source: sample_provider.txt
+
+# generator params
+params:
+  amount: 5
+  format: csv
+  args:
+    separator: '|'
+
+# user's env params, will be passed to generators as context object
+env:
+  foo: 43
+  bar:
+    fake: This is a fake sentence
+
+# data schema
+struct:
+  # it's a common table struct which stores students' info
+  # it will show some basic examples
+  student_info:
+    # basic generators examples
+    id:
+      type: int
+      rule: increase
+      value: 0
+    age:
+      rule: range
+      value: 12...18
+    sex:
+      rule: enum
+      value:
+       - 0
+       - 1
+    # eval generator (and basic usage of faker)
+    name:
+      rule: eval
+      value: fake.name()  # in-built provider
+    address:
+      rule: eval
+      value: fake.address()  # extended provider
+    id_card:
+      rule: eval
+      value: fake.my_provider()  # customized provider
+    # regex generator
+    account_name:
+      rule: regex
+      value: '[A-Z]{2,3}_?\d{6}'  # example: 'FZU_835486' or 'NS486245'
+
+  # this table will use some advance options or generators
+  grade_info:
+    # basic usage of foreign generator
+    id:
+      type: int
+      rule: foreign
+      value: student_info.id
+      args:
+        cast: one
+    # filter mode of foreign generator
+    name:
+      rule: foreign
+      value: student_info.name
+      args:
+        cast: filter
+        filters:
+          field: id
+          condition: field == line.id
+    # option 'order'
+    # we need the 'score' to judge whether he passed or not
+    # set order = 1 to make 'passed' generated later than 'score' (order = 0)
+    # so we can ref to score through 'line.score' in context
+    passed:
+      rule: eval
+      order: 1
+      value: "'Passed!' if line.score >= 60 else 'Failed...'"
+    # option 'if'
+    score:
+      type: int
+      rule: range
+      value: 50...100
+    grade:
+      - if: line.score >= 90
+        value: A
+      - if: line.score >= 80
+        value: B
+      - if: line.score >= 70
+        value: C
+      - value: D
+    # option 'limit'
+    readjust:
+      rule: range
+      value: -20...20
+      limit: line.score + value <= 100 and line.score + value >= 40

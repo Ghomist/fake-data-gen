@@ -42,7 +42,7 @@ python main.py your-scheme.yaml
 
 ## Schema 结构
 
-可以查看这个简单的[示例](./schema.yaml)
+可以查看这个简单的[示例](./sample_schema.yaml)
 
 schema 共分为4个部分：
 

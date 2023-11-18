@@ -8,9 +8,9 @@ from utils import type_convert
 
 # record how many times 'gen()' called
 gen_cnt = 0
-# how many times generate collide
+# how many times generation collided
 gen_col_cnt = 0
-# how many times generate failed (and leave it None)
+# how many times generation failed (and leave it None)
 gen_failed_cnt = 0
 
 

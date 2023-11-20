@@ -75,7 +75,7 @@ faker:
       source: my_provider.txt # 词条之间需要用常见分隔符分隔，如空格、英文逗号、英文分号、换行符、竖线等
 ```
 
-你可以在 faker 的[文档](https://faker.readthedocs.io/en/master/locales.html)处找到可用的语言以及对应的 providers
+你可以在 faker 的[文档](https://faker.readthedocs.io/en/master/locales.html)处找到可用的语言以及对应的 providers，也可以查看[本项目展示示例的自定义 provider](./sample_provider.txt)，它尽可能包含了可能的写法
 
 ### params
 

@@ -42,6 +42,7 @@ struct:
       value:
        - 0
        - 1
+
     # eval generator (and basic usage of faker)
     name:
       rule: eval
@@ -52,6 +53,7 @@ struct:
     id_card:
       rule: eval
       value: fake.my_provider()  # customized provider
+
     # regex generator
     account_name:
       rule: regex
@@ -66,6 +68,7 @@ struct:
       value: student_info.id
       args:
         cast: one
+
     # filter mode of foreign generator
     name:
       rule: foreign
@@ -75,20 +78,13 @@ struct:
         filters:
           field: id
           condition: field == line.id
-    # option 'order'
-    # we need the 'score' to judge whether he passed or not
-    # set order = 1 to make 'passed' generated later than 'score' (order = 0)
-    # so we can ref to score through 'line.score' in context
-    passed:
-      rule: eval
-      order: 1
-      value: "'Passed!' if line.score >= 60 else 'Failed...'"
+
     # option 'if'
     score:
       type: int
       rule: range
       value: 50...100
-    grade:
+    rank:
       - if: line.score >= 90
         value: A
       - if: line.score >= 80
@@ -96,6 +92,20 @@ struct:
       - if: line.score >= 70
         value: C
       - value: D
+
+    # option 'order'
+    # we need the 'readjust' to judge whether he passed or not
+    # set order = 1 to make 'passed' generated later than 'readjust' (order = 0)
+    # so we can ref to readjust through 'line.readjust' in context
+    passed:
+      - if: line.score + line.readjust >= 70
+        order: 1
+        value: Passed!
+      # script sort fields by the max order of generators
+      # this 0 is equal to order 1
+      - order: 0
+        value: Failed...
+
     # option 'limit'
     readjust:
       rule: range

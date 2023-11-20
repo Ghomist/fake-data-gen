@@ -6,6 +6,7 @@
 *.txt
 *.yaml
 *.csv
+*.sql
 
 # sample schema, you should copy this yaml schema and rename it instead of modify it
 !sample_schema.yaml

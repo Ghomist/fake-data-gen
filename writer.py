@@ -1,57 +1,76 @@
-from utils import replace_none
+from schema import params
 
 
 class BaseWriter:
     name: str = "base"
 
-    def pass_target_name(self, name: str) -> None:
-        pass
+    def __init__(self) -> None:
+        self.args: dict = params.get("args", {})
 
-    def pass_headers(self, headers: list) -> None:
+    def setup(self, name: str, headers: list[str]):
+        self.target_name = name
         self.headers = headers
         self.headers_len = len(headers)
-
-    def pass_args(self, context: dict):
-        self.args = context
+        filename = self._on_setup()
+        self.file = open(filename, "w") if filename else None
 
     def pass_line(self, line: list) -> None:
         assert self.headers_len == len(line)
-        pass  # do nothing in the base writer
 
-    def write(self) -> None:
-        pass  # do nothing in the base writer
+        def handle_special(content) -> str:
+            if content is None:
+                return ""
+            if type(content) is str:
+                return '"' + content + '"'
+            return str(content)
+
+        line = [handle_special(x) for x in line]
+
+        line_str = self._parse_line(line)
+        if self.file:
+            self.file.write(line_str + "\n")
+        else:
+            print(line_str)
+
+    def finish(self) -> None:
+        if self.file:
+            self.file.flush()
+            self.file.close()
+
+    def _on_setup(self) -> str | None:
+        return ""
+
+    def _parse_line(self, line: list) -> str:
+        return ""
 
 
 class PrintWriter(BaseWriter):
     name = "print"
 
-    def pass_target_name(self, name: str) -> None:
-        pass  # dont need file
-
-    def pass_line(self, line: list) -> None:
-        super().pass_line(line)
-        print(line)
-
 
 class CsvWriter(BaseWriter):
     name = "csv"
 
-    def pass_args(self, context: dict):
-        super().pass_args(context)
+    def _on_setup(self) -> str | None:
         self.separator = self.args.get("separator", ",")
         self.separator = eval("'" + self.separator + "'")
+        return self.target_name + ".csv"
 
-    def pass_target_name(self, name: str) -> None:
-        self.f = open(name + ".csv", "w")
+    def _parse_line(self, line: list) -> str:
+        return self.separator.join(line)
 
-    def pass_line(self, line: list) -> None:
-        super().pass_line(line)
-        line = [("" if x is None else str(x)) for x in line]
-        self.f.write(self.separator.join(line) + "\n")
 
-    def write(self) -> None:
-        self.f.flush()
-        self.f.close()
+class SqlWriter(BaseWriter):
+    name = "sql"
+
+    def _on_setup(self) -> str | None:
+        self.pattern = (
+            f"INSERT INTO {self.target_name} ({', '.join(self.headers)}) VALUES "
+        )
+        return self.target_name + ".sql"
+
+    def _parse_line(self, line: list) -> str:
+        return self.pattern + f"({', '.join(line)});"
 
 
 _name_class_mapping = {

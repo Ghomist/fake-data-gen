@@ -32,12 +32,14 @@ def main():
     xeger = Xeger()
     context["xeger"] = xeger.xeger
 
-    # user params
     amount = params.get("amount", 10)
-    writer_type = params["format"]
 
     data_map = dict()
     context["__data_map__"] = data_map
+
+    # prepare writer
+    writer_type = params["format"]
+    writer = get_writer(writer_type)
 
     # loop all tables
     for table_name, fields in struct.items():
@@ -106,13 +108,10 @@ def main():
             header_data_map[field_name] = gen_data
 
         # write/dump
-        writer = get_writer(writer_type)
-        writer.pass_target_name(table_name)
-        writer.pass_headers(headers)
-        writer.pass_args(params.get("args", {}))
+        writer.setup(table_name, headers)
         for line in zip(*list(header_data_map.values())):
             writer.pass_line(line)
-        writer.write()
+        writer.finish()
 
         data_map[table_name] = header_data_map
 

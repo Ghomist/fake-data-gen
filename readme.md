@@ -83,14 +83,32 @@ faker:
 
 ```yaml
 params:
-  # 生成数据的数量（目前每个表统一都会生成这么多）
-  amount: 100
-  # 生成数据的格式，目前支持 csv、print
+  # 生成数据的数量（此处不填的话默认为10）
+  amount: 30
+  # 生成数据的格式，目前支持 print、csv、sql
   format: csv
   # 对应不同的生成格式，有不同的参数可以选，这里是 csv 对应的参数示例
   args:
     separator: '|'
+    headers: true
 ```
+
+#### print 模式
+
+该模式直接在控制台输出一串数组（`python list`）
+
+#### 生成 csv
+
+生成 csv 可选的参数目前如下：
+
+|参数|说明|
+|---|---|
+|separator|分割符，默认为 `,`|
+|headers|是否添加表头，默认为 `false` 不添加|
+
+#### 生成 sql
+
+目前功能略微欠缺，仅支持生成形如 `INSERT INTO ... (...) VALUES (...);` 的语句，且不支持参数
 
 ### env
 

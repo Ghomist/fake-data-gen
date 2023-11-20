@@ -13,6 +13,10 @@ class BaseWriter:
         self.headers_len = len(headers)
         filename = self._on_setup()
         self.file = open(filename, "w") if filename else None
+        if self.file:
+            header_line = self._get_header_line()
+            if header_line:
+                self.file.write(header_line + "\n")
 
     def pass_line(self, line: list) -> None:
         assert self.headers_len == len(line)
@@ -38,7 +42,10 @@ class BaseWriter:
             self.file.close()
 
     def _on_setup(self) -> str | None:
-        return ""
+        return None
+
+    def _get_header_line(self) -> str | None:
+        return None
 
     def _parse_line(self, line: list) -> str:
         return ""
@@ -53,8 +60,12 @@ class CsvWriter(BaseWriter):
 
     def _on_setup(self) -> str | None:
         self.separator = self.args.get("separator", ",")
-        self.separator = eval("'" + self.separator + "'")
+        self.separator: str = eval("'" + self.separator + "'")
+        self.use_headers = self.args.get("headers", False)
         return self.target_name + ".csv"
+
+    def _get_header_line(self) -> str | None:
+        return self.separator.join(self.headers) if self.use_headers else None
 
     def _parse_line(self, line: list) -> str:
         return self.separator.join(line)

@@ -16,6 +16,7 @@ params:
   format: csv  # print(debug only), sql, csv
   args:
     separator: '|'
+    headers: true
 
 # user's env params, will be passed to generators as context object
 env:
@@ -44,7 +45,7 @@ struct:
     # eval generator (and basic usage of faker)
     name:
       rule: eval
-      value: fake.name()  # in-built provider
+      value: fake.name()  # built-in provider
     address:
       rule: eval
       value: fake.address()  # extended provider

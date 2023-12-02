@@ -21,14 +21,7 @@ class BaseWriter:
     def pass_line(self, line: list) -> None:
         assert self.headers_len == len(line)
 
-        def handle_special(content) -> str:
-            if content is None:
-                return ""
-            if type(content) is str:
-                return '"' + content + '"'
-            return str(content)
-
-        line = [handle_special(x) for x in line]
+        line = [self._format_value(x) for x in line]
 
         line_str = self._parse_line(line)
         if self.file:
@@ -40,6 +33,11 @@ class BaseWriter:
         if self.file:
             self.file.flush()
             self.file.close()
+
+    def _format_value(self, content) -> str:
+        if content is None:
+            return ""
+        return str(content)
 
     def _on_setup(self) -> str | None:
         return None
@@ -62,6 +60,7 @@ class CsvWriter(BaseWriter):
         self.separator = self.args.get("separator", ",")
         self.separator: str = eval("'" + self.separator + "'")
         self.use_headers = self.args.get("headers", False)
+        self.quotation = self.args.get("quotation", "none")
         return self.target_name + ".csv"
 
     def _get_header_line(self) -> str | None:
@@ -69,6 +68,16 @@ class CsvWriter(BaseWriter):
 
     def _parse_line(self, line: list) -> str:
         return self.separator.join(line)
+
+    def _format_value(self, content) -> str:
+        if type(content) is str:
+            if self.quotation == "single":
+                return "'" + content + "'"
+            elif self.quotation == "double":
+                return '"' + content + '"'
+            else:
+                return content
+        return super()._format_value(content)
 
 
 class SqlWriter(BaseWriter):
@@ -82,6 +91,11 @@ class SqlWriter(BaseWriter):
 
     def _parse_line(self, line: list) -> str:
         return self.pattern + f"({', '.join(line)});"
+
+    def _format_value(self, content) -> str:
+        if type(content) is str:
+            return '"' + content + '"'
+        return super()._format_value(content)
 
 
 _name_class_mapping = {

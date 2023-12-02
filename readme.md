@@ -105,6 +105,7 @@ params:
   args:
     separator: '|'
     headers: true
+    quotation: none
 ```
 
 #### print 模式
@@ -119,6 +120,7 @@ params:
 |---|---|
 |separator|分割符，默认为 `,`|
 |headers|是否添加表头，默认为 `false` 不添加|
+|quotation|是否使用引号包裹字符串，默认为 `none`，可选 `single` `double`|
 
 #### 生成 sql
 

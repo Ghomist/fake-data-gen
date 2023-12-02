@@ -18,9 +18,9 @@ def load_schema(file_name=None):
         file_name = "sample_schema.yaml"
 
     with open(file_name) as f:
-        schema = yaml.load(f, yaml.FullLoader)
+        schema: dict = yaml.load(f, yaml.FullLoader)
 
-    faker_config = schema["faker"]
+    faker_config = schema.get("faker", {})
     params = schema["params"]
     struct = schema["struct"]
 

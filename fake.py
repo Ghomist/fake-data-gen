@@ -13,10 +13,10 @@ def init_faker() -> Faker:
     global fake
 
     # locale
-    fake = Faker(faker_config["locales"])
+    fake = Faker(faker_config.get("locales", None))
 
     # provider
-    req_providers = faker_config["providers"]
+    req_providers = faker_config.get("providers", [])
     for req in req_providers:
         if type(req) is str:
             provider = eval(f"providers.{req}", {"providers": providers})

@@ -17,6 +17,7 @@ params:
   args:
     separator: '|'
     headers: true
+    quotation: double
 
 # user's env params, will be passed to generators as context object
 env:

@@ -1,3 +1,4 @@
+from os import mkdir, path
 from schema import params
 
 
@@ -12,7 +13,9 @@ class BaseWriter:
         self.headers = headers
         self.headers_len = len(headers)
         filename = self._on_setup()
-        self.file = open(filename, "w") if filename else None
+        if not path.exists(r"data/"):
+            mkdir(r"data/")
+        self.file = open(r"data/" + filename, "w") if filename else None
         if self.file:
             header_line = self._get_header_line()
             if header_line:

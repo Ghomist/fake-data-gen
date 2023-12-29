@@ -31,7 +31,7 @@ cd fake-data-gen
 python main.py
 ```
 
-执行完毕后会生成两个文件：`student_info.csv` 和 `grade_info.csv`
+执行完毕后会在当前目录下生成 `data` 文件夹，内部是作为结果的两个文件：`student_info.csv` 和 `grade_info.csv`
 
 建议自行构建 schema 时可以将 `sample_schema.yaml` 复制一份并重命名，然后执行命令：
 

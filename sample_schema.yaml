@@ -13,6 +13,7 @@ faker:
 # generator params
 params:
   amount: 5
+  max_try: 100
   format: csv  # print(debug only), sql, csv
   args:
     separator: '|'

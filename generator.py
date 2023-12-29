@@ -1,9 +1,10 @@
-from random import random, randrange, choice
+from random import choice, random, randrange
 from typing import Any
 
 from xeger import Xeger
 
 from context import context
+from schema import params
 from utils import type_convert
 
 # record how many times 'gen()' called
@@ -41,7 +42,7 @@ def _converted(gen):
     def wrap_func(self: BaseGenerator):
         global gen_cnt, gen_col_cnt, gen_failed_cnt
 
-        max_try = 100
+        max_try = params.get("max_try", 100)
         for _ in range(max_try):
             r = gen(self)
             gen_cnt += 1
